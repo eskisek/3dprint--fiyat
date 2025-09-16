@@ -8,7 +8,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from datetime import datetime
 
 st.set_page_config(page_title="3D Print Urun Fiyat Hesapla", layout="wide")
-st.title("🎯 3D Print Satış Fiyatı Hesaplayıcı")
+st.title("🎯 3D Print Urun Fiyat Hesapla")
 
 st.markdown("""
 Bu uygulama ile birden fazla 3D baskı ürününün maliyetini ve önerilen satış fiyatını hesaplayabilirsiniz.
@@ -105,5 +105,6 @@ if urun_listesi:
         file_name="3dprint_fiyatlar.pdf",
         mime="application/pdf"
     )
+
 
 
