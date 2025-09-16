@@ -73,7 +73,7 @@ if urun_listesi:
         styles = getSampleStyleSheet()
 
         # Başlık
-        title = Paragraph("3D Print Satış Fiyatları", styles['Title'])
+        title = Paragraph("3D Print Satis Fiyatlari", styles['Title'])
         elements.append(title)
         elements.append(Spacer(1, 12))
 
@@ -105,6 +105,7 @@ if urun_listesi:
         file_name="3dprint_fiyatlar.pdf",
         mime="application/pdf"
     )
+
 
 
 
