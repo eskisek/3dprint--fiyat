@@ -39,7 +39,7 @@ if urun_listesi:
     df["Önerilen Satış Fiyatı (TL)"] = df["Toplam Maliyet (TL)"] * (1 + kar_orani / 100)
     
     st.markdown("### Hesaplanan Ürünler")
-    st.dataframe(df.style.format("{:.2f}"))
+    st.dataframe(df)
 
     # Excel / CSV indirme
     st.markdown("### Dosya İndir")
@@ -50,3 +50,4 @@ if urun_listesi:
         file_name='3dprint_fiyatlar.csv',
         mime='text/csv'
     )
+
