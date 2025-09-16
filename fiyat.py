@@ -7,7 +7,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet
 from datetime import datetime
 
-st.set_page_config(page_title="3D Print Satış Fiyatı Hesaplayıcı", layout="wide")
+st.set_page_config(page_title="3D Print Urun Fiyat Hesapla", layout="wide")
 st.title("🎯 3D Print Satış Fiyatı Hesaplayıcı")
 
 st.markdown("""
@@ -105,4 +105,5 @@ if urun_listesi:
         file_name="3dprint_fiyatlar.pdf",
         mime="application/pdf"
     )
+
 
