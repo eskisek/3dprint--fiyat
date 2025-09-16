@@ -7,8 +7,8 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet
 from datetime import datetime
 
-st.set_page_config(page_title="3D Print Urun Fiyat Hesapla", layout="wide")
-st.title("🎯 3D Print Urun Fiyat Hesapla")
+st.set_page_config(page_title="3D Print Satış Fiyatı Hesaplayıcı", layout="wide")
+st.title("🎯 3D Print Satış Fiyatı Hesaplayıcı")
 
 st.markdown("""
 Bu uygulama ile birden fazla 3D baskı ürününün maliyetini ve önerilen satış fiyatını hesaplayabilirsiniz.
@@ -22,67 +22,46 @@ diger = st.number_input("Diğer giderler (TL)", value=0.0)
 kar_orani = st.slider("Kar marjı (%)", 0, 200, 30)
 
 st.markdown("---")
-st.subheader("Ürün Bilgileri")
+st.subheader("Ürün Bilgileri (Tablo)")
 
-urunlar = st.text_area(
-    "Ürün adlarını ve gramajlarını girin (ör: Ürün1,50 veya Ürün2 100).\nBoş satırlar göz ardı edilir.",
-    height=150
-)
+# Başlangıç için boş DataFrame
+if 'urunler_df' not in st.session_state:
+    st.session_state.urunler_df = pd.DataFrame({
+        "Ürün": ["Ürün1", "Ürün2"],
+        "Gram": [50.0, 100.0]
+    })
 
-urun_listesi = []
-if urunlar:
-    satirlar = urunlar.split("\n")
-    for s in satirlar:
-        s = s.strip()
-        if not s:
-            continue
-        # Esnek ayırıcı: virgül veya boşluk
-        if "," in s:
-            ad, gram = s.split(",", 1)
-        else:
-            parts = s.split()
-            if len(parts) < 2:
-                st.warning(f"Satır hatalı: {s}")
-                continue
-            ad, gram = parts[0], parts[1]
-        try:
-            gram = float(gram.strip())
-            ad = ad.strip()
-            urun_listesi.append({"Ürün": ad, "Gram": gram})
-        except:
-            st.warning(f"Gramaj hatalı: {s}")
+df_input = st.data_editor(st.session_state.urunler_df, num_rows="dynamic")
+st.session_state.urunler_df = df_input
 
-if urun_listesi:
-    df = pd.DataFrame(urun_listesi)
+if not df_input.empty:
+    df = df_input.copy()
     df["Filament Maliyeti (TL)"] = (filament_fiyat / 1000) * df["Gram"]
     df["Toplam Maliyet (TL)"] = df["Filament Maliyeti (TL)"] + elektrik + iscilik + diger
     df["Önerilen Satış Fiyatı (TL)"] = df["Toplam Maliyet (TL)"] * (1 + kar_orani / 100)
 
-    st.markdown("### Hesaplanan Ürünler")
-    st.dataframe(df.style.format({
-        "Filament Maliyeti (TL)": "{:.2f}",
-        "Toplam Maliyet (TL)": "{:.2f}",
-        "Önerilen Satış Fiyatı (TL)": "{:.2f}"
-    }))
+    # Sayıları 2 ondalık olarak formatla
+    df_display = df.copy()
+    for col in ["Gram", "Filament Maliyeti (TL)", "Toplam Maliyet (TL)", "Önerilen Satış Fiyatı (TL)"]:
+        df_display[col] = df_display[col].map(lambda x: f"{x:.2f}")
 
-    # PDF oluşturma fonksiyonu (şık tablo)
+    st.markdown("### Hesaplanan Ürünler")
+    st.dataframe(df_display)
+
+    # PDF oluşturma fonksiyonu
     def convert_df_to_pdf(df):
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         elements = []
         styles = getSampleStyleSheet()
 
-        # Başlık
-        title = Paragraph("3D Print Satis Fiyatlari", styles['Title'])
+        title = Paragraph("3D Print Satış Fiyatları", styles['Title'])
         elements.append(title)
         elements.append(Spacer(1, 12))
-
-        # Tarih
         date_str = datetime.now().strftime("%d-%m-%Y %H:%M")
         elements.append(Paragraph(f"Tarih: {date_str}", styles['Normal']))
         elements.append(Spacer(1, 12))
 
-        # Tablo verisi
         data = [df.columns.tolist()] + df.round(2).values.tolist()
         table = Table(data, hAlign='LEFT')
         table.setStyle(TableStyle([
@@ -105,7 +84,3 @@ if urun_listesi:
         file_name="3dprint_fiyatlar.pdf",
         mime="application/pdf"
     )
-
-
-
-
